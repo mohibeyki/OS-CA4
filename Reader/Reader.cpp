@@ -10,7 +10,8 @@
 
 namespace OS {
 
-Reader::Reader(std::string inputFile) : file(inputFile) {
+Reader::Reader(std::string inputFile) :
+		file(inputFile) {
 
 }
 

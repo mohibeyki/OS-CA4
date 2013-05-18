@@ -14,6 +14,7 @@
 #include <iostream>
 #include <unistd.h>
 #include <cstdlib>
+#include <semaphore.h>
 
 namespace OS {
 
@@ -23,16 +24,18 @@ namespace OS {
 
 class MemoryManager {
 public:
+	static MemoryManager* getInstance();
+	int getFreePageIndex(int dest);
+	int getPageWithId(int id);
+	void freePage(int pageId);
+private:
+	static MemoryManager* instance;
 	MemoryManager();
 	virtual ~MemoryManager();
-	int 	getFreePage();
-	int 	getPageWithId(int pageId);
-	void 	freePage(int pageId);
-
-private:
-    key_t 	key;
-    int 	shmid;
-    char* 	memory;
+	key_t key;
+	int shmid;
+	char* memory;
+	sem_t locks[MEMORY_HEIGHT];
 };
 
 } /* namespace OS */

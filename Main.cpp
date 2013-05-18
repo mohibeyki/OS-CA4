@@ -6,16 +6,12 @@
  */
 
 #include <iostream>
-#include "MemoryManager/MemoryManager.h"
+#include <MemoryManager.h>
 
 using namespace std;
 using namespace OS;
 
 int main(int argc, char* argv[]) {
-	{
-		MemoryManager* memoryManager = new MemoryManager();
-		delete(memoryManager);
-	}
 	std::cout << "Hello World! :D" << std::endl;
 	return 0;
 }

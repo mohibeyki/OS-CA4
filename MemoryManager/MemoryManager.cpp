@@ -5,11 +5,21 @@
  *      Author: mohi
  */
 
-#include "MemoryManager.h"
+#include <MemoryManager.h>
 
 namespace OS {
 
+MemoryManager* MemoryManager::instance = NULL;
+
+MemoryManager* MemoryManager::getInstance() {
+	if (instance == NULL)
+		instance = new MemoryManager();
+	return instance;
+}
+
 MemoryManager::MemoryManager() {
+	for (int i = 1; i < MEMORY_HEIGHT; ++i)
+		sem_init(&locks[i], 0, 1);
 	srand(time(0));
 	key = rand() % 4096;
 
@@ -22,17 +32,41 @@ MemoryManager::MemoryManager() {
 		std::cerr << "ERROR: shmat()" << std::endl;
 	}
 
-	for (int i = 0; i < 26; ++i)
-		memory[i] = 'a' + i;
+	memory[0] = 127;
+	for (int i = 1; i < MEMORY_HEIGHT; ++i) {
+		memory[i] = -1;
+	}
+}
+
+int MemoryManager::getFreePageIndex(int dest) {
+	for (int i = 1; i < MEMORY_HEIGHT; ++i) {
+		if (memory[i] == -1 && sem_trywait(&locks[i]) == 0) {
+			memory[i] = dest;
+			return i;
+		}
+	}
+	return -1;
+}
+
+int MemoryManager::getPageWithId(int id) {
+	for (int i = 1; i < MEMORY_HEIGHT; ++i)
+		if (memory[i] == id && sem_trywait(&locks[i]) == 0)
+			return i;
+	return -1;
+}
+
+void MemoryManager::freePage(int pageId) {
+	if (pageId < MEMORY_HEIGHT) {
+		int value;
+		sem_getvalue(&locks[pageId], &value);
+		if (value == 0)
+			sem_post(&locks[pageId]);
+		memory[pageId] = -1;
+	}
 }
 
 MemoryManager::~MemoryManager() {
-	std::cerr << "Destructor" << std::endl;
-	for (int i = 0; i < 27; ++i)
-		std::cout << memory[i];
-	std::cout << std::endl;
 	shmdt(memory);
-	std::cerr << "Deattached" << std::endl;
 }
 
 } /* namespace OS */
