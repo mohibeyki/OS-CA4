@@ -13,7 +13,7 @@ LIBDIR = $(TOPDIR)/.lib
 OBJDIR = .obj
 DEPDIR = .dep
 
-DEPLIBS = Reader MemoryManager
+DEPLIBS = Reader MemoryManager Writer
 
 SRCS = $(filter-out Main.cpp,$(wildcard *.cpp))
 OBJS = $(foreach OBJ,$(SRCS:.cpp=.o),$(OBJDIR)/$(OBJ))

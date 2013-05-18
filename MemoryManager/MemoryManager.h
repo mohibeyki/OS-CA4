@@ -28,13 +28,14 @@ public:
 	int getFreePageIndex(int dest);
 	int getPageWithId(int id);
 	void freePage(int pageId);
+	void pageReady(int pageId);
+	char* memory;
 private:
 	static MemoryManager* instance;
 	MemoryManager();
 	virtual ~MemoryManager();
 	key_t key;
 	int shmid;
-	char* memory;
 	sem_t locks[MEMORY_HEIGHT];
 };
 

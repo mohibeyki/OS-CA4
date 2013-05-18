@@ -65,6 +65,15 @@ void MemoryManager::freePage(int pageId) {
 	}
 }
 
+void MemoryManager::pageReady(int pageId) {
+	if (pageId < MEMORY_HEIGHT) {
+		int value;
+		sem_getvalue(&locks[pageId], &value);
+		if (value == 0)
+			sem_post(&locks[pageId]);
+	}
+}
+
 MemoryManager::~MemoryManager() {
 	shmdt(memory);
 }
