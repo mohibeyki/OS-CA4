@@ -1,0 +1,44 @@
+SHELL = /bin/sh
+
+CC=gcc
+CXX=g++
+
+CXXFLAGS = -O2 -pipe -Wall -g -pthread -I. \
+						$(foreach DEPLIB,$(DEPLIBS),-I$(TOPDIR)/$(DEPLIB))
+
+CXXSTATICFLAGS = -O2 -pipe -Wall -static -static-libgcc -I. \
+						$(foreach DEPLIB,$(DEPLIBS),-I$(TOPDIR)/$(DEPLIB))
+
+LIBDIR = $(TOPDIR)/.lib
+OBJDIR = .obj
+DEPDIR = .dep
+
+DEPLIBS = Reader
+
+SRCS = $(filter-out Main.cpp,$(wildcard *.cpp))
+OBJS = $(foreach OBJ,$(SRCS:.cpp=.o),$(OBJDIR)/$(OBJ))
+DEPS = $(foreach DEP,$(SRCS:.cpp=.d),$(DEPDIR)/$(DEP))
+
+$(OBJDIR)/%.o: %.cpp
+	$(CXX) -c $(CXXFLAGS) $(DEFS) -o $@ $<
+
+$(DEPDIR)/%.d: %.cpp
+	@$(SHELL) -ec '$(CXX) -MM $(CXXFLAGS) $< \
+	| sed '\''s/$*.o/$(OBJDIR)\/$*.o\ $(DEPDIR)\/$*.d/g'\'' > $@; \
+	[ -s $@ ] || rm -f $@'
+
+all:: $(LIBDIR)
+
+$(LIBDIR):
+	mkdir $@
+
+ifneq ($(DEPS),)
+ifneq ($(MAKECMDGOALS),tidy)
+ifneq ($(MAKECMDGOALS),clean)
+sinclude $(DEPS)
+endif
+endif
+endif
+
+clean::
+	rm -f *~ $(OBJDIR)/*.o *.log $(DEPDIR)/*.d
