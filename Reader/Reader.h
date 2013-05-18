@@ -8,6 +8,8 @@
 #ifndef READER_H_
 #define READER_H_
 
+#include <iostream>
+
 namespace OS {
 
 class Reader {
