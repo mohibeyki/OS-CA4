@@ -59,9 +59,12 @@ void MemoryManager::freePage(int pageId) {
 	if (pageId < MEMORY_HEIGHT) {
 		int value;
 		sem_getvalue(&locks[pageId], &value);
+		std::cout << "VALUE BEFORE: " << value << std::endl;
 		if (value == 0)
 			sem_post(&locks[pageId]);
 		memory[pageId] = -1;
+		sem_getvalue(&locks[pageId], &value);
+		std::cout << "VALUE AFTER : " << value << std::endl;
 	}
 }
 
@@ -72,6 +75,13 @@ void MemoryManager::pageReady(int pageId) {
 		if (value == 0)
 			sem_post(&locks[pageId]);
 	}
+}
+
+bool MemoryManager::isEmpty() {
+	for (int i = 0; i < MEMORY_HEIGHT; ++i)
+		if (memory[i] != -1)
+			return false;
+	return true;
 }
 
 MemoryManager::~MemoryManager() {

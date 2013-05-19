@@ -9,19 +9,15 @@
 #include <pthread.h>
 #include <cstring>
 
-//#define fin cin
 namespace OS {
 using namespace std;
 
-Reader::Reader(std::string inputFile, int num) :
-		file(inputFile), number(num) {
-	MAX_PAGE_SIZE = MEMORY_WIDTH - 4;
-
-}
-
-void Reader::run() {
+void* Reader::run(void* fileNum) {
+	int MAX_PAGE_SIZE = MEMORY_WIDTH - 4;
 	MemoryManager* memInstance = MemoryManager::getInstance();
-	ifstream fin(file.c_str());
+	char fileName[MEMORY_WIDTH];
+	sprintf(fileName, "%lld.txt", (long long) fileNum);
+	ifstream fin(fileName);
 	char c;
 	char tmp[MEMORY_WIDTH];
 	fin >> c;
@@ -67,15 +63,15 @@ void Reader::run() {
 			}
 
 			//	log
-				cerr << "Page: StartByte: " << startByte << " WhichFile: "
+			cerr << "Page: StartByte: " << startByte << " WhichFile: "
 					<< whichFile << endl;
-				cerr << (int) tmp[0] << endl;
-				cerr << (int) tmp[1] << endl;
-				cerr << (int) tmp[2] << endl;
-				cerr << (int) tmp[3] << endl;
-				for (int i = 4; i < count; i++)
-					cerr << tmp[i];
-				cerr << endl;
+			cerr << (int) tmp[0] << endl;
+			cerr << (int) tmp[1] << endl;
+			cerr << (int) tmp[2] << endl;
+			cerr << (int) tmp[3] << endl;
+			for (int i = 4; i < count; i++)
+				cerr << tmp[i];
+			cerr << endl;
 			//	log end
 
 			// write data on page
@@ -101,9 +97,8 @@ void Reader::run() {
 			break;
 	}
 	fin.close();
-}
-
-Reader::~Reader() {
+	std::cout <<"I'm done " << fileName << std::endl;
+	return NULL;
 }
 
 } /* namespace OS */

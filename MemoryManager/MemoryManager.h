@@ -30,6 +30,7 @@ public:
 	void freePage(int pageId);
 	void pageReady(int pageId);
 	char* memory;
+	bool isEmpty();
 private:
 	static MemoryManager* instance;
 	MemoryManager();

@@ -14,12 +14,12 @@ namespace OS {
 
 class Writer {
 public:
-	Writer(int m);
-	void Write(char buf[MEMORY_WIDTH], int file);
-	void Sentinel(int fileNo);
-private:
-	sem_t *locks;
+	static void init(int m);
+	static void Write(char buf[MEMORY_WIDTH], int file);
+	static void* Sentinel(void* fileVoid);
 };
+
+extern sem_t* locks;
 
 } /* namespace OS */
 #endif /* WRITER_H_ */

@@ -16,13 +16,7 @@ namespace OS {
 
 class Reader {
 public:
-	Reader(std::string inputFile, int num);
-	void run();
-	virtual ~Reader();
-private:
-	std::string file;
-	int number;
-	int MAX_PAGE_SIZE;
+	static void* run(void* fileNum);
 };
 
 } /* namespace OS */

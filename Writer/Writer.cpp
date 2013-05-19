@@ -11,7 +11,9 @@
 
 namespace OS {
 
-Writer::Writer(int m) {
+sem_t* locks;
+
+void Writer::init(int m) {
 	locks = new sem_t[m];
 	for (; m > 0; --m) {
 		char fileName[MEMORY_WIDTH] = "";
@@ -45,7 +47,7 @@ void Writer::Write(char buf[MEMORY_WIDTH], int file) {
 	FILE* myFile = fopen(fileName, "r+");
 	int offset = (((unsigned char) buf[0] * 256 + (unsigned char) buf[1]) * 256
 			+ (unsigned char) buf[2]) * 256 + (unsigned char) buf[3];
-	std::cout << "Offset: " << offset << std::endl;
+//	std::cout << "Offset: " << offset << std::endl;
 	fseek(myFile, offset, SEEK_SET);
 	for (int i = 4; i < MEMORY_WIDTH && buf[i] != 0; ++i) {
 		fputc(buf[i], myFile);
@@ -54,19 +56,31 @@ void Writer::Write(char buf[MEMORY_WIDTH], int file) {
 	sem_post(&locks[file]);
 }
 
-void Writer::Sentinel(int fileNo) {
+void* Writer::Sentinel(void* fileVoid) {
+	long long fileNo = (long long) fileVoid;
 	MemoryManager* memInstance = MemoryManager::getInstance();
 	int count = 0;
 	while (memInstance->memory[255] == 1) {
 		int pageId = memInstance->getPageWithId(fileNo);
 		while (pageId < 0) {
-			usleep(rand() % 10 + 1);
+			usleep(rand() % 10 + 10000);
+			int count = 0;
+			for (int i = 1; i < 100; i++)
+				if (memInstance->memory[i] == fileNo)
+					count++;
+			if (count > 0) {
+				std::cout << "I'm stuck " << fileNo << std::endl;
+				std::cout << "Count for file " << fileNo << ' ' << count
+						<< std::endl;
+			}
 			pageId = memInstance->getPageWithId(fileNo);
 		}
+		std::cout << "I'm gonna write " << pageId << std::endl;
 		Writer::Write(memInstance->memory + pageId * MEMORY_WIDTH, fileNo);
 		memInstance->freePage(pageId);
 		count++;
 	}
+	return NULL;
 }
 
 } /* namespace OS */
