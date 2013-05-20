@@ -42,6 +42,9 @@ int MemoryManager::getFreePageIndex(int dest) {
 	for (int i = 1; i < MEMORY_HEIGHT; ++i) {
 		if (memory[i] == -1 && sem_trywait(&locks[i]) == 0) {
 			memory[i] = dest;
+			std::cerr << "GET: Page " << i
+					<< " has been dedicated to reader for file "
+					<< "recovered files/" << dest << ".txt" << std::endl;
 			return i;
 		}
 	}
@@ -50,35 +53,32 @@ int MemoryManager::getFreePageIndex(int dest) {
 
 int MemoryManager::getPageWithId(int id) {
 	for (int i = 1; i < MEMORY_HEIGHT; ++i)
-		if (memory[i] == id && sem_trywait(&locks[i]) == 0)
+		if (memory[i] == id && sem_trywait(&locks[i]) == 0) {
+			std::cerr << "GET: Page " << i
+					<< " has been dedicated to writer for file "
+					<< "corrected files/" << id << ".txt" << std::endl;
 			return i;
+		}
 	return -1;
 }
 
 void MemoryManager::freePage(int pageId) {
 	if (pageId < MEMORY_HEIGHT) {
-		int value;
-		sem_getvalue(&locks[pageId], &value);
-		std::cout << "VALUE BEFORE: " << value << std::endl;
-		if (value == 0)
-			sem_post(&locks[pageId]);
+		std::cerr << "FREE: Page " << pageId << " has been freed from a reader" << std::endl;
+		sem_post(&locks[pageId]);
 		memory[pageId] = -1;
-		sem_getvalue(&locks[pageId], &value);
-		std::cout << "VALUE AFTER : " << value << std::endl;
 	}
 }
 
 void MemoryManager::pageReady(int pageId) {
 	if (pageId < MEMORY_HEIGHT) {
-		int value;
-		sem_getvalue(&locks[pageId], &value);
-		if (value == 0)
-			sem_post(&locks[pageId]);
+		std::cerr << "FREE: Page " << pageId << " has been freed" << std::endl;
+		sem_post(&locks[pageId]);
 	}
 }
 
 bool MemoryManager::isEmpty() {
-	for (int i = 0; i < MEMORY_HEIGHT; ++i)
+	for (int i = 1; i < MEMORY_HEIGHT; ++i)
 		if (memory[i] != -1)
 			return false;
 	return true;

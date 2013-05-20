@@ -14,7 +14,7 @@ namespace OS {
 
 class Writer {
 public:
-	static void init(int m);
+	static void Init(int m);
 	static void Write(char buf[MEMORY_WIDTH], int file);
 	static void* Sentinel(void* fileVoid);
 };

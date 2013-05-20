@@ -27,6 +27,7 @@ clean tidy::
 	rm -f outs FormEdit
 	rm -rf Logfiles
 	rm -rf LogFiles/*
+	rm -rf *.rec
 
 all clean tidy::
 	@for I in $(DEPLIBS); do $(MAKE) -C $$I $@ || exit 1; done

@@ -16,7 +16,7 @@ namespace OS {
 
 class Reader {
 public:
-	static void* run(void* fileNum);
+	static void* Run(void* fileNum);
 };
 
 } /* namespace OS */

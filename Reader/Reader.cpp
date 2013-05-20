@@ -12,14 +12,16 @@
 namespace OS {
 using namespace std;
 
-void* Reader::run(void* fileNum) {
-	int MAX_PAGE_SIZE = MEMORY_WIDTH - 4;
+int MAX_PAGE_SIZE = MEMORY_WIDTH - 4;
+
+void* Reader::Run(void* fileNum) {
 	MemoryManager* memInstance = MemoryManager::getInstance();
 	char fileName[MEMORY_WIDTH];
-	sprintf(fileName, "%lld.txt", (long long) fileNum);
-	ifstream fin(fileName);
 	char c;
 	char tmp[MEMORY_WIDTH];
+
+	sprintf(fileName, "recovered files/%lld.txt", (long long) fileNum);
+	ifstream fin(fileName);
 	fin >> c;
 	while (true) {
 		int startByte = 0, whichFile = 0;
@@ -37,7 +39,7 @@ void* Reader::run(void* fileNum) {
 				fin >> c;
 			}
 		}
-		startByte -= startByte > 0 ? 1 : 0;
+		startByte--;
 		int flag = 0;
 		while (flag == 0) {
 			memset(tmp, 0, MEMORY_WIDTH);
@@ -48,8 +50,7 @@ void* Reader::run(void* fileNum) {
 
 			for (int i = 0; i < MAX_PAGE_SIZE; i++) {
 				c = fin.get();
-				if (fin.good()) {
-
+				if (fin.good() && !fin.eof() && c != 0x0a) {
 					if (c == '<') {
 						flag = 1;
 						break;
@@ -59,35 +60,24 @@ void* Reader::run(void* fileNum) {
 					flag = 2;
 					break;
 				}
-
 			}
-
-			//	log
-			cerr << "Page: StartByte: " << startByte << " WhichFile: "
-					<< whichFile << endl;
-			cerr << (int) tmp[0] << endl;
-			cerr << (int) tmp[1] << endl;
-			cerr << (int) tmp[2] << endl;
-			cerr << (int) tmp[3] << endl;
-			for (int i = 4; i < count; i++)
-				cerr << tmp[i];
-			cerr << endl;
-			//	log end
-
 			// write data on page
 			int pageID = memInstance->getFreePageIndex(whichFile);
 			while (pageID < 0) {
 				usleep(rand() % 10 + 1);
 				pageID = memInstance->getFreePageIndex(whichFile);
 			}
+
 			// get page ID
 			int startPos = pageID * MEMORY_WIDTH;
+
 			// write tmp on page with ID
-			for (int i = 0; i < count; i++)
+			for (int i = 0; i < MEMORY_WIDTH; i++)
 				memInstance->memory[i + startPos] = tmp[i];
+
 			// signal the page
 			memInstance->pageReady(pageID);
-			// end
+
 			startByte += count - 4;
 			count = 4;
 		}
@@ -97,7 +87,6 @@ void* Reader::run(void* fileNum) {
 			break;
 	}
 	fin.close();
-	std::cout <<"I'm done " << fileName << std::endl;
 	return NULL;
 }
 

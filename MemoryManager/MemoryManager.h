@@ -29,12 +29,12 @@ public:
 	int getPageWithId(int id);
 	void freePage(int pageId);
 	void pageReady(int pageId);
-	char* memory;
 	bool isEmpty();
+	char* memory;
 private:
-	static MemoryManager* instance;
 	MemoryManager();
 	virtual ~MemoryManager();
+	static MemoryManager* instance;
 	key_t key;
 	int shmid;
 	sem_t locks[MEMORY_HEIGHT];
